@@ -10,6 +10,8 @@ const app = express()                           // crear app
 app.set('view engine', 'pug')
 app.set('views', './views')
 
+                                        //carpeta publica
+app.use(express.static('public'))
 
                                         //routing(definir rutas de la app)
                                             
