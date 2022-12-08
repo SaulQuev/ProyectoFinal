@@ -1,41 +1,51 @@
-import  express  from 'express'                         //se importa para poder trabajar los modulos sintaxis js
-import usuarioRoutes from './routes/usuarioRoutes.js'   //se importa para poder trabajar con usuarioRoutes.js
-import db from './config/db.js'                         //se importa para poder trabajar con db.js
+import express from 'express'
+import csrf from 'csurf'
+import cookieParser from 'cookie-parser'
+import usuarioRoutes from './routes/usuarioRoutes.js'
+import propiedadesRoutes from './routes/propiedadesRoutes.js'
+import appRoutes from './routes/appRoutes.js'
+import apiRoutes from './routes/apiRoutes.js'
+import db from './config/db.js'
 
-                                                        //const express = require('express')
+// Crear la app
+const app = express()
 
+// Habilitar lectura de datos de formularios
+app.use( express.urlencoded({extended: true}) )
 
-const app = express()                           // crear app
+// Habilitar Cookie Parser
+app.use( cookieParser() )
 
-//lectura de datos del formulario
-app.use( express.urlencoded({extended: true}))
+// Habilitar CSRF
+app.use( csrf({cookie: true}) )
 
-//conexion a la base de datos
-try{
-   await db.authenticate();
-   //sincroniza para crear la tabla
-   db.sync()
-   console.log('Conexion correcta a la base de datos')
-}catch(error){
+// Conexión a la base de datos
+try {
+    await db.authenticate();
+    db.sync()
+    console.log('Conexión Correcta a la Base de datos')
+} catch (error) {
     console.log(error)
 }
 
-                                                //habilitar pug
+// Habilitar Pug
 app.set('view engine', 'pug')
 app.set('views', './views')
 
-                                        //carpeta publica
-app.use(express.static('public'))
+// Carpeta Pública
+app.use( express.static('public') )
 
-                                        //routing(definir rutas de la app)
-                                            
-app.use('/auth', usuarioRoutes)         //use busca todas las rutas que se ponga la /  y se le asignaran las rutas de usuarioRoutes
+// Routing
+app.use('/', appRoutes)
+app.use('/auth', usuarioRoutes)
+app.use('/', propiedadesRoutes)
+app.use('/api', apiRoutes)
 
 
 
-const port = 4000;                  //definicion de puerto inicia proyecto
 
-                                    //conectar al puerto
-app.listen(port, () =>{
-    console.log('El Servidor esta funcionando en el puerto',port)
+// Definir un puerto y arrancar el proyecto
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`El Servidor esta funcionando en el puerto ${port}`)
 });
